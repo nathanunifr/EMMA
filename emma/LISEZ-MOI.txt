@@ -18,6 +18,6 @@ CODE D'ACCES
   Les téléphones déjà installés garderont l'ancienne version tant qu'ils n'ont pas rouvert l'app en ligne.
 
 VIE PRIVÉE
-  Le code n'est jamais envoyé nulle part. Aucun cookie, aucun traceur, aucune requête vers un serveur tiers (hors lien YouTube ouvert par la personne).
+  Le code n'est jamais envoyé nulle part. Aucun traceur propre à EMMA. Le lecteur YouTube n'est chargé qu'après un clic ; la lecture contacte alors les serveurs de YouTube, qui peut utiliser des cookies et recevoir des données techniques. Le lecteur intégré nécessite Internet.
   La progression (jours terminés) est stockée uniquement dans le téléphone (localStorage).
   Note : l'hébergeur du site peut voir les journaux techniques habituels (adresse IP) ; choisissez-le en conséquence.
