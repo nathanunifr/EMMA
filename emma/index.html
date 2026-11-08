@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EMMA</title>
+<meta name="description" content="EMMA, étude MIND-P : programme de pleine conscience pour mieux vivre avec les douleurs chroniques.">
+<meta name="theme-color" content="#1B7F8C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EMMA">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="referrer" content="no-referrer">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{
+  --bg:#F2F7F6;--surface:#fff;--ink:#14292D;--muted:#55696C;--line:#D9E5E3;--soft:#E7F1EF;--done:#2A8A57;
+  --m0:#1B7F8C;--m1:#4A57B8;--m2:#8A4FA0;--m3:#2F8F5B;--m4:#B26A1E;
+  --c-ecrit:#B5731A;--c-pratique:#2A8A57;--c-physique:#C2552B;--c-audio:#6A4DB8;--c-video:#2B6CB0;--c-audiovideo:#6A4DB8;--c-recap:#1B7F8C;--c-apercu:#4A5F7A;
+  --fs:1;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1A1C;--surface:#162528;--ink:#E7F1F0;--muted:#9DB3B5;--line:#264043;--soft:#1C3033;--done:#5CC48A;
+  --m0:#4CB8C6;--m1:#8E9BF0;--m2:#C28BDA;--m3:#6CCB97;--m4:#E3A25B;
+  --c-ecrit:#E3A25B;--c-pratique:#6CCB97;--c-physique:#F08A63;--c-audio:#A793F0;--c-video:#6FAEE8;--c-audiovideo:#A793F0;--c-recap:#4CB8C6;--c-apercu:#9DB3C9;
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;font-size:calc(100% * var(--fs))}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.6 system-ui,-apple-system,"SF Pro Text",sans-serif;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+h1,h2,h3,.brand,.num{font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,sans-serif}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--m0);outline-offset:2px;border-radius:8px}
+.wrap{max-width:42rem;margin:0 auto;padding:0 1.1rem 3rem}
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;min-height:3.2rem;padding-bottom:0}
+.back,.tool{min-height:2.75rem;display:inline-flex;align-items:center;gap:.3rem;padding:0 .7rem;margin:0 -.7rem;border:0;background:none;text-decoration:none;font-weight:600;color:var(--m0);cursor:pointer}
+.tool{margin:0 -.7rem 0 0;color:var(--ink)}
+/* accueil */
+.hero{padding:2.2rem 0 1.2rem}
+.brand{font-size:3rem;line-height:1;font-weight:800;letter-spacing:.04em;margin:0;color:var(--m0)}
+.sub{margin:.5rem 0 0;color:var(--muted);font-size:1.05rem}
+.prog{margin:1.6rem 0 0;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:1.1rem 1.2rem}
+.prog b{font-size:1.05rem}
+.meter{height:10px;border-radius:99px;background:var(--soft);margin:.7rem 0 1rem;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--done);border-radius:99px;transition:width .4s}
+.cta{display:flex;align-items:center;justify-content:center;min-height:3.2rem;border-radius:14px;background:var(--m0);color:#fff;font-weight:700;text-decoration:none;padding:0 1rem;font-size:1.05rem}
+@media (prefers-color-scheme:dark){.cta{color:#06181B}}
+details{margin:1.4rem 0 0}
+summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:.8rem;min-height:3rem}
+summary::-webkit-details-marker{display:none}
+summary h2{margin:0;font-size:1.25rem;line-height:1.25}
+summary small{display:block;color:var(--muted);font-weight:500;font-size:.9rem;font-family:system-ui,-apple-system,sans-serif}
+summary::after{content:"";width:.6rem;height:.6rem;border-right:2.5px solid var(--muted);border-bottom:2.5px solid var(--muted);transform:rotate(45deg);transition:transform .2s;margin-right:.3rem;flex:none}
+details[open] summary::after{transform:rotate(-135deg)}
+.list{display:grid;gap:.6rem;margin:.5rem 0 0;padding:0;list-style:none}
+.day{display:flex;align-items:center;gap:.9rem;min-height:4.2rem;padding:.7rem .9rem;background:var(--surface);border:1px solid var(--line);border-radius:16px;text-decoration:none}
+.day:active{background:var(--soft)}
+.num{flex:none;width:2.8rem;height:2.8rem;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:1.2rem;background:color-mix(in srgb,var(--mc) 14%,var(--surface));color:var(--mc)}
+.day.done .num{background:var(--done);color:#fff}
+@media (prefers-color-scheme:dark){.day.done .num{color:#06181B}}
+.day span.t{flex:1;min-width:0;line-height:1.3;font-weight:600}
+.day em{display:block;font-style:normal;font-weight:400;color:var(--muted);font-size:.85rem;margin-top:.15rem}
+.day .ok{color:var(--done);font-weight:700;font-size:.85rem;flex:none}
+.foot{margin-top:2.2rem;text-align:center}
+.foot a{color:var(--muted);font-size:.95rem}
+/* jour */
+.dh{padding:1.6rem 0 .4rem}
+.mod{font-weight:700;color:var(--mc);margin:0}
+.dh h1{font-size:1.9rem;line-height:1.2;margin:.3rem 0 .8rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:0;padding:0;list-style:none}
+.chips li{background:var(--soft);border-radius:99px;padding:.25rem .7rem;font-size:.85rem;color:var(--muted)}
+.content{max-width:38rem;padding-top:.6rem}
+.content p,.content li{margin:.7rem 0}
+.content h3{font-size:1.3rem;line-height:1.3;margin:2rem 0 .3rem}
+.content ul,.content ol{padding-left:1.3rem}
+.content img{display:block;max-width:100%;height:auto;border-radius:16px;margin:1.2rem auto}
+.scroll{overflow-x:auto}
+.box{margin:1.5rem 0;padding:1rem 1.1rem 1.1rem;border-radius:20px;--c:var(--ink);
+  background:color-mix(in srgb,var(--c) 8%,var(--surface));border:1.5px solid color-mix(in srgb,var(--c) 35%,transparent)}
+.box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+.box-h{font-family:ui-rounded,system-ui,sans-serif;font-weight:800;font-size:1rem;color:var(--c);margin-bottom:.4rem}
+.box h3{margin-top:.6rem}
+.t-ecrit{--c:var(--c-ecrit)}.t-pratique{--c:var(--c-pratique)}.t-physique{--c:var(--c-physique)}.t-audio{--c:var(--c-audio)}
+.t-video{--c:var(--c-video)}.t-audiovideo{--c:var(--c-audiovideo)}.t-recap{--c:var(--c-recap)}.t-apercu{--c:var(--c-apercu)}
+.play{display:flex;align-items:center;justify-content:center;min-height:3.4rem;margin:1.1rem 0 .2rem;border-radius:14px;background:var(--c);color:#fff;font-weight:700;font-size:1.05rem;text-decoration:none}
+@media (prefers-color-scheme:dark){.play{color:#0B1416}}
+.finish{margin:2.4rem 0 1rem;display:grid;gap:.8rem}
+.btn{min-height:3.4rem;border-radius:14px;border:2px solid var(--done);background:var(--done);color:#fff;font-weight:700;font-size:1.05rem;cursor:pointer;padding:0 1rem}
+@media (prefers-color-scheme:dark){.btn{color:#06181B}}
+.btn.is-done{background:transparent;color:var(--done)}
+.nav{display:flex;justify-content:space-between;gap:.6rem}
+.nav a{flex:1;display:flex;align-items:center;justify-content:center;min-height:3rem;border:1px solid var(--line);background:var(--surface);border-radius:14px;text-decoration:none;font-weight:600;text-align:center;padding:0 .6rem}
+.nav a.off{visibility:hidden}
+/* info */
+.info h1{font-size:1.8rem;margin:1.6rem 0 .5rem}.info h2{font-size:1.2rem;margin:1.8rem 0 .2rem}
+.info p,.info li{max-width:38rem}
+.danger{margin-top:1rem;min-height:3rem;border-radius:14px;border:1.5px solid var(--c-physique);background:none;color:var(--c-physique);font-weight:700;padding:0 1rem;cursor:pointer}
+.gate{margin-top:1rem}.gate label{display:block;font-weight:700;font-size:1.1rem}.hint{margin:.2rem 0 .8rem;color:var(--muted)}
+.field{width:100%;min-height:3.4rem;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:1.15rem;padding:0 1rem;letter-spacing:.04em}
+.field:focus{border-color:var(--m0);outline:none}.err{min-height:1.6rem;margin:.5rem 0;color:var(--c-physique);font-weight:600}
+.cta[disabled]{opacity:.6}
+.sr{position:absolute;left:-9999px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="content.enc.js"></script>
+<script>
+(function(){
+var E=null,app=document.getElementById('app');
+var store={get:function(k,d){try{var v=localStorage.getItem('emma.'+k);return v?JSON.parse(v):d}catch(e){return d}},
+ set:function(k,v){try{localStorage.setItem('emma.'+k,JSON.stringify(v))}catch(e){}},
+ del:function(k){try{localStorage.removeItem('emma.'+k)}catch(e){}}};
+var done=store.get('done',[]),SIZES=[1,1.12,1.25],size=store.get('size',0);
+var TYPES={lecture:['📖','Lecture'],ecrit:['✍️','Exercice écrit'],pratique:['🧘','Exercice pratique'],physique:['🏃','Exercice physique'],
+ audio:['🎧','Audio'],video:['🎬','Vidéo'],audiovideo:['🎧','Audio / vidéo'],recap:['🔁','Récap'],apercu:['🧭','Aperçu du module']};
+function applySize(){document.documentElement.style.setProperty('--fs',SIZES[size])}
+function isDone(n){return done.indexOf(n)>-1}
+function save(){store.set('done',done)}
+function day(n){return E.jours.filter(function(d){return d.n===n})[0]}
+function mod(id){return E.modules.filter(function(m){return m.id===id})[0]}
+function mc(id){return 'var(--m'+((id-1)%5)+')'}
+function chips(d){return '<ul class="chips" aria-label="Au programme">'+d.types.map(function(t){return '<li>'+TYPES[t][0]+' '+TYPES[t][1]+'</li>'}).join('')+'</ul>'}
+function nextDay(){var r=E.jours.filter(function(d){return !isDone(d.n)})[0];return r||null}
+
+function home(){
+  var total=E.jours.length,n=done.filter(function(x){return day(x)}).length,nx=nextDay();
+  var cur=nx?nx.module:E.modules[0].id;
+  var h='<main class="wrap"><header class="hero"><h1 class="brand">EMMA</h1><p class="sub">Étude MIND-P · programme de pleine conscience. Un jour à la fois, à votre rythme.</p>'+
+   '<div class="prog"><b>'+n+' jour'+(n>1?'s':'')+' terminé'+(n>1?'s':'')+' sur '+total+'</b><div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+n+'"><i style="width:'+(100*n/total)+'%"></i></div>'+
+   (nx?'<a class="cta" href="#/jour/'+nx.n+'">'+(n?'Reprendre au jour ':'Commencer au jour ')+nx.n+'</a>':'<p style="margin:0">Bravo, vous avez parcouru tout le programme.</p>')+'</div></header>';
+  E.modules.forEach(function(m){
+    var js=E.jours.filter(function(d){return d.module===m.id});
+    h+='<details'+(m.id===cur?' open':'')+' style="--mc:'+mc(m.id)+'"><summary><h2><small style="color:'+mc(m.id)+'">Module '+m.id+'</small>'+m.titre+'</h2></summary><ol class="list">';
+    js.forEach(function(d){var dn=isDone(d.n);
+      h+='<li><a class="day'+(dn?' done':'')+'" href="#/jour/'+d.n+'" style="--mc:'+mc(m.id)+'"><span class="num" aria-hidden="true">'+(dn?'✓':d.n)+'</span><span class="t"><span class="sr">Jour '+d.n+' : </span>'+d.titre+
+      '<em>'+d.types.map(function(t){return TYPES[t][1]}).join(' · ')+'</em></span>'+(dn?'<span class="ok">Terminé</span>':'')+'</a></li>'});
+    h+='</ol></details>'});
+  h+='<p class="foot"><a href="#/info">Confidentialité et informations</a></p></main>';
+  app.innerHTML=h;document.title='EMMA'}
+
+function bar(left,withSize){return '<div class="bar"><div class="wrap">'+left+(withSize?'<button class="tool" id="sz" aria-label="Changer la taille du texte">Aa</button>':'<span></span>')+'</div></div>'}
+
+function dayView(n){
+  var d=day(n);if(!d){location.hash='#/';return}
+  var p=day(n-1),q=day(n+1),m=mod(d.module),dn=isDone(n);
+  app.innerHTML=bar('<a class="back" href="#/">‹ Programme</a>',true)+
+   '<main class="wrap" style="--mc:'+mc(d.module)+'"><header class="dh"><p class="mod">Jour '+d.n+' · Module '+m.id+' : '+m.titre+'</p><h1>'+d.titre+'</h1>'+chips(d)+'</header>'+
+   '<article class="content">'+d.html+'</article>'+
+   '<div class="finish"><button class="btn'+(dn?' is-done':'')+'" id="fin" aria-pressed="'+dn+'">'+(dn?'✓ Jour terminé (appuyer pour annuler)':'Marquer ce jour comme terminé')+'</button>'+
+   '<nav class="nav" aria-label="Navigation entre les jours"><a class="'+(p?'':'off')+'" href="#/jour/'+(p?p.n:n)+'">‹ Jour '+(p?p.n:'')+'</a><a class="'+(q?'':'off')+'" href="#/jour/'+(q?q.n:n)+'">Jour '+(q?q.n:'')+' ›</a></nav></div></main>';
+  document.title='Jour '+d.n+' · EMMA';
+  document.getElementById('fin').onclick=function(){
+    var i=done.indexOf(n);if(i>-1)done.splice(i,1);else done.push(n);save();dayView(n);window.scrollTo(0,document.body.scrollHeight)};
+  document.getElementById('sz').onclick=function(){size=(size+1)%SIZES.length;store.set('size',size);applySize()}}
+
+function info(){
+  app.innerHTML=bar('<a class="back" href="#/">‹ Programme</a>',false)+'<main class="wrap info"><h1>Confidentialité</h1>'+
+  '<p>EMMA ne collecte <b>aucune donnée</b> sur vous. Il n’y a ni compte, ni formulaire, ni outil de mesure d’audience, ni cookie, ni publicité.</p>'+
+  '<h2>Ce qui reste sur votre téléphone</h2><p>Le code d’accès est vérifié uniquement sur votre téléphone : il n’est envoyé nulle part. Trois informations sont mémorisées sur votre appareil, et ne le quittent jamais : l’accès au programme, la liste des jours que vous avez marqués comme terminés, et la taille de texte choisie.</p>'+
+  '<h2>Les audios et vidéos</h2><p>Les pistes audio sont hébergées sur YouTube. En appuyant sur un bouton d’écoute, vous quittez EMMA et ouvrez YouTube, qui applique ses propres règles de confidentialité. Rien d’autre n’est partagé avec YouTube.</p>'+
+  '<h2>Effacer mes informations</h2><p>Cela remet votre progression à zéro sur cet appareil.</p><button class="danger" id="rst">Effacer ma progression</button><h2>Verrouiller l’application</h2><p>Le code d’accès sera à nouveau demandé.</p><button class="danger" id="lk">Verrouiller l’application</button></main>';
+  document.getElementById('lk').onclick=function(){E=null;store.del('k');if(location.hash==='#/info')location.hash='#/';else route()};
+  document.getElementById('rst').onclick=function(){if(confirm('Effacer votre progression sur cet appareil ?')){done=[];store.del('done');store.del('size');size=0;applySize();location.hash='#/'}}}
+
+function route(){
+  if(!E){if(location.hash==='#/info')info();else gate();window.scrollTo(0,0);return}
+  var h=location.hash,m=h.match(/^#\/jour\/(\d+)$/);
+  if(m)dayView(parseInt(m[1],10));else if(h==='#/info')info();else home();
+  window.scrollTo(0,0)}
+
+var X=window.EMMA_ENC;
+function fromB64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+function toB64(u){var s='';for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
+function normCode(c){return c.replace(/\s+/g,'').replace(/[\u2010-\u2015\u2212]/g,'-').toUpperCase()}
+function openWith(keyBytes){
+  return crypto.subtle.importKey('raw',keyBytes,'AES-GCM',false,['decrypt']).then(function(k){
+    return crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(X.iv)},k,fromB64(X.data))}).then(function(buf){E=JSON.parse(new TextDecoder().decode(buf))})}
+function derive(code){
+  return crypto.subtle.importKey('raw',new TextEncoder().encode(normCode(code)),'PBKDF2',false,['deriveBits']).then(function(k){
+    return crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:fromB64(X.salt),iterations:X.iter},k,256)}).then(function(b){return new Uint8Array(b)})}
+function gate(){
+  app.innerHTML='<main class="wrap"><header class="hero"><h1 class="brand">EMMA</h1><p class="sub">Étude MIND-P</p></header>'+
+   '<form id="gf" class="gate" novalidate><label for="code">Code d’accès</label><p class="hint">Saisissez le code remis par l’équipe de l’étude.</p>'+
+   '<input class="field" id="code" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">'+
+   '<p class="err" id="err" role="alert"></p><button class="cta" id="go" type="submit" style="width:100%;border:0;cursor:pointer">Accéder au programme</button></form>'+
+   '<p class="foot"><a href="#/info">Confidentialité</a></p></main>';
+  document.title='EMMA';
+  var f=document.getElementById('gf'),err=document.getElementById('err'),go=document.getElementById('go');
+  f.onsubmit=function(ev){ev.preventDefault();var v=document.getElementById('code').value;if(!v.trim()){err.textContent='Saisissez le code d’accès.';return}
+    err.textContent='';go.disabled=true;go.textContent='Vérification…';
+    derive(v).then(function(kb){return openWith(kb).then(function(){store.set('k',toB64(kb));location.hash='#/';route()})}).catch(function(){
+      go.disabled=false;go.textContent='Accéder au programme';err.textContent='Ce code n’est pas valide. Vérifiez-le et réessayez.'})}}
+function boot(){
+  var k=store.get('k',null);
+  if(k&&X&&window.crypto&&crypto.subtle){openWith(fromB64(k)).then(route).catch(function(){store.del('k');route()})}else route()}
+applySize();window.addEventListener('hashchange',route);boot();
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('sw.js').catch(function(){})}
+})();
+</script>
+</body>
+</html>

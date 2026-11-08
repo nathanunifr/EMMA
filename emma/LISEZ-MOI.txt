@@ -1,0 +1,23 @@
+EMMA – Étude MIND-P : application web installable (PWA), sans collecte de données.
+
+CONTENU
+  index.html, content.enc.js (programme CHIFFRÉ), sw.js (hors ligne), manifest.webmanifest, dossier icons/
+
+METTRE EN LIGNE (gratuit) – il faut une adresse en https
+  Option simple : Netlify (https://app.netlify.com/drop) : glisser-déposer le dossier « emma » décompressé.
+  Autre option : GitHub Pages ou Cloudflare Pages.
+  Ensuite : partager le lien ou un QR code avec les participants.
+
+INSTALLER SUR IPHONE (dans Safari)
+  Bouton Partager (carré avec flèche) > « Sur l'écran d'accueil » > Ajouter.
+
+CODE D'ACCES
+  Le contenu (textes et images) est chiffré dans content.enc.js. Sans le code, il est illisible, même en téléchargeant les fichiers.
+  Le code est vérifié uniquement sur le téléphone. Il est demandé une seule fois par appareil.
+  Pour changer le code ou ajouter les jours 15 à 70 : renvoyez-moi le Word et/ou le nouveau code, je régénère content.enc.js.
+  Les téléphones déjà installés garderont l'ancienne version tant qu'ils n'ont pas rouvert l'app en ligne.
+
+VIE PRIVÉE
+  Le code n'est jamais envoyé nulle part. Aucun cookie, aucun traceur, aucune requête vers un serveur tiers (hors lien YouTube ouvert par la personne).
+  La progression (jours terminés) est stockée uniquement dans le téléphone (localStorage).
+  Note : l'hébergeur du site peut voir les journaux techniques habituels (adresse IP) ; choisissez-le en conséquence.
