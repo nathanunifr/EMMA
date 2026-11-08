@@ -88,6 +88,13 @@ details[open] summary::after{transform:rotate(-135deg)}
 .t-ecrit{--c:var(--c-ecrit)}.t-pratique{--c:var(--c-pratique)}.t-physique{--c:var(--c-physique)}.t-audio{--c:var(--c-audio)}
 .t-video{--c:var(--c-video)}.t-audiovideo{--c:var(--c-audiovideo)}.t-recap{--c:var(--c-recap)}.t-apercu{--c:var(--c-apercu)}
 .play{display:flex;align-items:center;justify-content:center;min-height:3.4rem;margin:1.1rem 0 .2rem;border-radius:14px;background:var(--c);color:#fff;font-weight:700;font-size:1.05rem;text-decoration:none}
+.content a[hidden]{display:none!important}
+.inline-media{margin:1.1rem 0 1.5rem}
+.inline-media[hidden]{display:none}
+.inline-media iframe{display:block;width:100%;aspect-ratio:16/9;min-height:200px;border:0;border-radius:14px;background:#000}
+.inline-media-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem 1rem;margin-top:.6rem}
+.inline-media-actions a{font-size:.9rem;color:var(--muted)}
+.media-close{cursor:pointer;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:.5rem .8rem;font-weight:600}
 @media (prefers-color-scheme:dark){.play{color:#0B1416}}
 .finish{margin:2.4rem 0 1rem;display:grid;gap:.8rem}
 .btn{min-height:3.4rem;border-radius:14px;border:2px solid var(--done);background:var(--done);color:#fff;font-weight:700;font-size:1.05rem;cursor:pointer;padding:0 1rem}
@@ -147,6 +154,48 @@ function home(){
 
 function bar(left,withSize){return '<div class="bar"><div class="wrap">'+left+(withSize?'<button class="tool" id="sz" aria-label="Changer la taille du texte">Aa</button>':'<span></span>')+'</div></div>'}
 
+
+function youtubeVideoId(raw){
+  try{
+    var u=new URL(raw,location.href),host=u.hostname.toLowerCase().replace(/^www\./,'');
+    var parts=u.pathname.split('/').filter(Boolean),id=null;
+    if(host==='youtu.be')id=parts[0];
+    else if(['youtube.com','m.youtube.com','music.youtube.com','youtube-nocookie.com'].indexOf(host)>-1){
+      if(parts[0]==='watch')id=u.searchParams.get('v');
+      else if(['embed','shorts','live','v'].indexOf(parts[0])>-1)id=parts[1];
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id||'')?id:null;
+  }catch(e){return null}
+}
+function attachInlineMedia(){
+  Array.prototype.forEach.call(app.querySelectorAll('.content a[href]'),function(link){
+    var id=youtubeVideoId(link.href);
+    if(!id)return;
+    var holder=document.createElement('div');holder.className='inline-media';holder.hidden=true;
+    var actions=document.createElement('div');actions.className='inline-media-actions';
+    var close=document.createElement('button');close.type='button';close.className='media-close';close.textContent='Fermer le lecteur';
+    var fallback=document.createElement('a');fallback.href=link.href;fallback.target='_blank';fallback.rel='noopener noreferrer';fallback.textContent='Ouvrir sur YouTube si besoin';
+    actions.appendChild(close);actions.appendChild(fallback);holder.appendChild(actions);
+    link.insertAdjacentElement('afterend',holder);
+    link.addEventListener('click',function(ev){
+      ev.preventDefault();
+      if(!holder.hidden)return;
+      var iframe=document.createElement('iframe');
+      iframe.title=link.textContent.trim()||'Lecteur YouTube';
+      iframe.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';
+      iframe.allowFullscreen=true;
+      iframe.referrerPolicy='strict-origin-when-cross-origin';
+      iframe.src='https://www.youtube-nocookie.com/embed/'+id+'?playsinline=1&rel=0&autoplay=1';
+      holder.insertBefore(iframe,actions);
+      holder.hidden=false;link.hidden=true;
+    });
+    close.addEventListener('click',function(){
+      var iframe=holder.querySelector('iframe');if(iframe)iframe.remove();
+      holder.hidden=true;link.hidden=false;link.focus();
+    });
+  });
+}
+
 function dayView(n){
   var d=day(n);if(!d){location.hash='#/';return}
   var p=day(n-1),q=day(n+1),m=mod(d.module),dn=isDone(n);
@@ -156,6 +205,7 @@ function dayView(n){
    '<div class="finish"><button class="btn'+(dn?' is-done':'')+'" id="fin" aria-pressed="'+dn+'">'+(dn?'✓ Jour terminé (appuyer pour annuler)':'Marquer ce jour comme terminé')+'</button>'+
    '<nav class="nav" aria-label="Navigation entre les jours"><a class="'+(p?'':'off')+'" href="#/jour/'+(p?p.n:n)+'">‹ Jour '+(p?p.n:'')+'</a><a class="'+(q?'':'off')+'" href="#/jour/'+(q?q.n:n)+'">Jour '+(q?q.n:'')+' ›</a></nav></div></main>';
   document.title='Jour '+d.n+' · EMMA';
+  attachInlineMedia();
   document.getElementById('fin').onclick=function(){
     var i=done.indexOf(n);if(i>-1)done.splice(i,1);else done.push(n);save();dayView(n);window.scrollTo(0,document.body.scrollHeight)};
   document.getElementById('sz').onclick=function(){size=(size+1)%SIZES.length;store.set('size',size);applySize()}}
@@ -164,7 +214,7 @@ function info(){
   app.innerHTML=bar('<a class="back" href="#/">‹ Programme</a>',false)+'<main class="wrap info"><h1>Confidentialité</h1>'+
   '<p>EMMA ne collecte <b>aucune donnée</b> sur vous. Il n’y a ni compte, ni formulaire, ni outil de mesure d’audience, ni cookie, ni publicité.</p>'+
   '<h2>Ce qui reste sur votre téléphone</h2><p>Le code d’accès est vérifié uniquement sur votre téléphone : il n’est envoyé nulle part. Trois informations sont mémorisées sur votre appareil, et ne le quittent jamais : l’accès au programme, la liste des jours que vous avez marqués comme terminés, et la taille de texte choisie.</p>'+
-  '<h2>Les audios et vidéos</h2><p>Les pistes audio sont hébergées sur YouTube. En appuyant sur un bouton d’écoute, vous quittez EMMA et ouvrez YouTube, qui applique ses propres règles de confidentialité. Rien d’autre n’est partagé avec YouTube.</p>'+
+  '<h2>Les audios et vidéos</h2><p>Les contenus audio et vidéo sont diffusés par YouTube dans un lecteur intégré à EMMA. Le lecteur ne se charge que lorsque vous choisissez de lancer un contenu. À partir de ce moment, votre appareil contacte YouTube, qui peut recevoir votre adresse IP et des informations techniques, et utiliser des cookies selon ses règles de confidentialité. La lecture nécessite une connexion Internet. Si un contenu ne fonctionne pas dans EMMA, un lien permet de l’ouvrir sur YouTube.</p>'+
   '<h2>Effacer mes informations</h2><p>Cela remet votre progression à zéro sur cet appareil.</p><button class="danger" id="rst">Effacer ma progression</button><h2>Verrouiller l’application</h2><p>Le code d’accès sera à nouveau demandé.</p><button class="danger" id="lk">Verrouiller l’application</button></main>';
   document.getElementById('lk').onclick=function(){E=null;store.del('k');if(location.hash==='#/info')location.hash='#/';else route()};
   document.getElementById('rst').onclick=function(){if(confirm('Effacer votre progression sur cet appareil ?')){done=[];store.del('done');store.del('size');size=0;applySize();location.hash='#/'}}}
