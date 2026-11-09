@@ -1,23 +1,43 @@
-EMMA – Étude MIND-P : application web installable (PWA), sans collecte de données.
+EMMA – Programme complet (10 modules, 70 jours) · Démonstration web
 
-CONTENU
-  index.html, content.enc.js (programme CHIFFRÉ), sw.js (hors ligne), manifest.webmanifest, dossier icons/
+LIEN
+  https://nathanunifr.github.io/EMMA/emma/
 
-METTRE EN LIGNE (gratuit) – il faut une adresse en https
-  Option simple : Netlify (https://app.netlify.com/drop) : glisser-déposer le dossier « emma » décompressé.
-  Autre option : GitHub Pages ou Cloudflare Pages.
-  Ensuite : partager le lien ou un QR code avec les participants.
+CONTENU ET PARCOURS
+  Le programme reprend les 70 journées des 10 modules du document
+  « EMMA – Contenu complet du programme », V1.0 du 06.11.2026.
+  Chaque journée est présentée en étapes successives :
+  « Découvrir la suite », « Passer à l’exercice », etc.
+  On peut revenir à l’étape précédente et reprendre la lecture plus tard.
+  Les textes, exercices, liens et illustrations sont intégrés au
+  fichier chiffré content.enc.js.
 
-INSTALLER SUR IPHONE (dans Safari)
-  Bouton Partager (carré avec flèche) > « Sur l'écran d'accueil » > Ajouter.
+CONFIDENTIALITÉ
+  Aucun questionnaire ou formulaire n’envoie de réponse à un serveur.
+  Le code d’accès, la progression des jours, l’étape en cours et la
+  taille de texte sont mémorisés dans le navigateur de l’appareil.
+  Il n’y a ni compte ni synchronisation entre appareils.
+  Les vidéos YouTube ne contactent YouTube qu’au lancement du lecteur.
+  GitHub Pages peut conserver les journaux techniques usuels d’hébergement.
 
-CODE D'ACCES
-  Le contenu (textes et images) est chiffré dans content.enc.js. Sans le code, il est illisible, même en téléchargeant les fichiers.
-  Le code est vérifié uniquement sur le téléphone. Il est demandé une seule fois par appareil.
-  Pour changer le code ou ajouter les jours 15 à 70 : renvoyez-moi le Word et/ou le nouveau code, je régénère content.enc.js.
-  Les téléphones déjà installés garderont l'ancienne version tant qu'ils n'ont pas rouvert l'app en ligne.
+ACCÈS
+  Le fichier content.enc.js est chiffré avec AES-GCM : le code n’est
+  pas publié dans ce dépôt. Il faut demander le code d’accès à l’équipe.
+  ATTENTION : la version complète a un nouveau code d’accès.
+  L’ancien code des modules 1–2 ne permet plus d’ouvrir le programme.
+  À la première ouverture après la mise à jour, saisir le nouveau code.
 
-VIE PRIVÉE
-  Le code n'est jamais envoyé nulle part. Aucun traceur propre à EMMA. Le lecteur YouTube n'est chargé qu'après un clic ; la lecture contacte alors les serveurs de YouTube, qui peut utiliser des cookies et recevoir des données techniques. Le lecteur intégré nécessite Internet.
-  La progression (jours terminés) est stockée uniquement dans le téléphone (localStorage).
-  Note : l'hébergeur du site peut voir les journaux techniques habituels (adresse IP) ; choisissez-le en conséquence.
+SUR IPHONE
+  Ouvrir le lien dans Safari > Partager > Sur l’écran d’accueil.
+  Si une ancienne version est affichée, rouvrir la page dans Safari
+  et actualiser; si nécessaire, effacer les données de ce site.
+
+TECHNIQUE
+  index.html             Interface et déroulement des étapes
+  content.enc.js         Contenu chiffré du programme complet
+  sw.js                  Cache hors ligne de l’application
+  manifest.webmanifest   Paramètres de l’installation mobile
+  icons/                 Icônes
+
+La plateforme ne remplace pas un suivi clinique ni l’évaluation
+réglementaire et éthique du projet avant une utilisation en étude.
