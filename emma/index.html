@@ -113,6 +113,26 @@ details[open] summary::after{transform:rotate(-135deg)}
 .cta[disabled]{opacity:.6}
 .sr{position:absolute;left:-9999px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Parcours en plusieurs écrans, optimisé iPhone et accessible au clavier */
+.stepper{margin-top:1.2rem}
+.step-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem;font-weight:700}
+.step-track{height:7px;background:var(--soft);border-radius:10px;overflow:hidden;margin:.55rem 0 1.4rem}
+.step-track i{height:100%;display:block;background:var(--mc);border-radius:10px;transition:width .25s}
+.step-body{min-height:8rem;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:1.2rem 1.1rem;overflow-wrap:anywhere}
+.step-body>:first-child{margin-top:0}
+.step-body>:last-child{margin-bottom:0}
+.step-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin:1.1rem 0}
+.step-primary,.step-secondary{min-height:3.3rem;border-radius:14px;font-weight:700;cursor:pointer;padding:.65rem 1rem}
+.step-primary{flex:1;border:2px solid var(--mc);background:var(--mc);color:#fff}
+.step-secondary{border:1px solid var(--line);background:var(--surface)}
+.step-finish{display:grid;gap:.5rem;padding:1.1rem 0 0}
+.step-finish p{color:var(--muted);margin:.2rem 0}
+.day-nav{margin:1.3rem 0 2.4rem}
+.data-table{border-collapse:collapse;font-size:.9rem;width:100%}
+.data-table td{border:1px solid var(--line);padding:.55rem}
+@media(prefers-color-scheme:dark){.step-primary{color:#0B1416}}
+@media(max-width:380px){.step-secondary,.step-primary{width:100%}}
 </style>
 </head>
 <body>
@@ -124,7 +144,7 @@ var E=null,app=document.getElementById('app');
 var store={get:function(k,d){try{var v=localStorage.getItem('emma.'+k);return v?JSON.parse(v):d}catch(e){return d}},
  set:function(k,v){try{localStorage.setItem('emma.'+k,JSON.stringify(v))}catch(e){}},
  del:function(k){try{localStorage.removeItem('emma.'+k)}catch(e){}}};
-var done=store.get('done',[]),SIZES=[1,1.12,1.25],size=store.get('size',0);
+var done=store.get('done',[]),position=store.get('position',{}),SIZES=[1,1.12,1.25],size=store.get('size',0);
 var TYPES={lecture:['📖','Lecture'],ecrit:['✍️','Exercice écrit'],pratique:['🧘','Exercice pratique'],physique:['🏃','Exercice physique'],
  audio:['🎧','Audio'],video:['🎬','Vidéo'],audiovideo:['🎧','Audio / vidéo'],recap:['🔁','Récap'],apercu:['🧭','Aperçu du module']};
 function applySize(){document.documentElement.style.setProperty('--fs',SIZES[size])}
@@ -196,28 +216,60 @@ function attachInlineMedia(){
   });
 }
 
+// Les journées apparaissent progressivement, sans envoyer de réponses au serveur.
+function slidesFor(d){
+  if(Array.isArray(d.steps)&&d.steps.length)return d.steps;
+  var holder=document.createElement('div');holder.innerHTML=d.html||'';
+  var slides=[],group=[],words=0;
+  function flush(){if(group.length){slides.push(group.map(function(el){return el.outerHTML}).join(''));group=[];words=0}}
+  Array.prototype.forEach.call(holder.children,function(el){
+    var count=(el.textContent||'').trim().split(/\s+/).length;
+    var isBox=el.classList.contains('box');
+    if(group.length&&(words+count>190||(el.tagName==='H3'&&words>=60)||(isBox&&words>=40)))flush();
+    group.push(el);words+=count;
+    if(isBox&&words>=125)flush();
+  });flush();return slides.length?slides:['<p>Cette journée ne contient pas encore de texte.</p>'];
+}
 function dayView(n){
   var d=day(n);if(!d){location.hash='#/';return}
-  var p=day(n-1),q=day(n+1),m=mod(d.module),dn=isDone(n);
+  var p=day(n-1),q=day(n+1),m=mod(d.module),steps=slidesFor(d);
+  var index=Math.max(0,Math.min(steps.length-1,Number(position[n])||0));
   app.innerHTML=bar('<a class="back" href="#/">‹ Programme</a>',true)+
    '<main class="wrap" style="--mc:'+mc(d.module)+'"><header class="dh"><p class="mod">Jour '+d.n+' · Module '+m.id+' : '+m.titre+'</p><h1>'+d.titre+'</h1>'+chips(d)+'</header>'+
-   '<article class="content">'+d.html+'</article>'+
-   '<div class="finish"><button class="btn'+(dn?' is-done':'')+'" id="fin" aria-pressed="'+dn+'">'+(dn?'✓ Jour terminé (appuyer pour annuler)':'Marquer ce jour comme terminé')+'</button>'+
-   '<nav class="nav" aria-label="Navigation entre les jours"><a class="'+(p?'':'off')+'" href="#/jour/'+(p?p.n:n)+'">‹ Jour '+(p?p.n:'')+'</a><a class="'+(q?'':'off')+'" href="#/jour/'+(q?q.n:n)+'">Jour '+(q?q.n:'')+' ›</a></nav></div></main>';
+   '<div class="stepper" id="stepper"></div></main>';
   document.title='Jour '+d.n+' · EMMA';
-  attachInlineMedia();
-  document.getElementById('fin').onclick=function(){
-    var i=done.indexOf(n);if(i>-1)done.splice(i,1);else done.push(n);save();dayView(n);window.scrollTo(0,document.body.scrollHeight)};
-  document.getElementById('sz').onclick=function(){size=(size+1)%SIZES.length;store.set('size',size);applySize()}}
+  document.getElementById('sz').onclick=function(){size=(size+1)%SIZES.length;store.set('size',size);applySize()};
+  function render(){
+    position[n]=index;store.set('position',position);
+    var pct=Math.round(100*(index+1)/steps.length),atEnd=index===steps.length-1,doneNow=isDone(n);
+    var nextHtml=steps[index+1]||'';
+    var label=/class="box t-(pratique|ecrit|physique|audio|video|audiovideo)/.test(nextHtml)?'Passer à l’exercice':
+      /class="box t-recap/.test(nextHtml)?'Découvrir le récapitulatif':'Découvrir la suite';
+    var h='<div class="step-meta"><span>Étape '+(index+1)+' sur '+steps.length+'</span><span>'+pct+' %</span></div>'+
+      '<div class="step-track" role="progressbar" aria-label="Progression dans cette journée" aria-valuemin="0" aria-valuemax="'+steps.length+'" aria-valuenow="'+(index+1)+'"><i style="width:'+pct+'%"></i></div>'+
+      '<article class="content step-body" aria-label="Contenu de l’étape '+(index+1)+'">'+steps[index]+'</article>'+
+      '<div class="step-actions">'+(index>0?'<button class="step-secondary" id="prev" type="button">‹ Étape précédente</button>':'')+
+      (!atEnd?'<button class="step-primary" id="next" type="button">'+label+' <span aria-hidden="true">›</span></button>':'')+'</div>'+
+      (atEnd?'<div class="step-finish"><p>Vous avez découvert toutes les étapes de cette journée.</p><button class="btn'+(doneNow?' is-done':'')+'" id="fin" type="button" aria-pressed="'+doneNow+'">'+(doneNow?'✓ Journée terminée · Annuler':'✓ Terminer cette journée')+'</button></div>':'')+
+      '<nav class="nav day-nav" aria-label="Navigation entre les jours"><a class="'+(p?'':'off')+'" href="#/jour/'+(p?p.n:n)+'">‹ Jour '+(p?p.n:'')+'</a><a class="'+(q?'':'off')+'" href="#/jour/'+(q?q.n:n)+'">Jour '+(q?q.n:'')+' ›</a></nav>';
+    document.getElementById('stepper').innerHTML=h;
+    attachInlineMedia();
+    var prev=document.getElementById('prev'),next=document.getElementById('next'),fin=document.getElementById('fin');
+    if(prev)prev.onclick=function(){index--;render();window.scrollTo(0,0)};
+    if(next)next.onclick=function(){index++;render();window.scrollTo(0,0)};
+    if(fin)fin.onclick=function(){var j=done.indexOf(n);if(j>-1)done.splice(j,1);else done.push(n);save();render();window.scrollTo(0,0)};
+  }
+  render();
+}
 
 function info(){
   app.innerHTML=bar('<a class="back" href="#/">‹ Programme</a>',false)+'<main class="wrap info"><h1>Confidentialité</h1>'+
   '<p>EMMA ne collecte pas vos réponses ni votre progression sur un serveur. Il n’y a ni compte, ni formulaire, ni outil de mesure d’audience propre à EMMA. Les contenus YouTube, lorsqu’ils sont lancés, sont soumis aux règles de confidentialité de YouTube expliquées ci-dessous.</p>'+
-  '<h2>Ce qui reste sur votre téléphone</h2><p>Le code d’accès est vérifié uniquement sur votre téléphone : il n’est envoyé nulle part. Trois informations sont mémorisées sur votre appareil, et ne le quittent jamais : l’accès au programme, la liste des jours que vous avez marqués comme terminés, et la taille de texte choisie.</p>'+
+  '<h2>Ce qui reste sur votre téléphone</h2><p>Le code d’accès est vérifié uniquement sur votre téléphone : il n’est envoyé nulle part. Quatre informations sont mémorisées sur votre appareil, et ne le quittent jamais : l’accès au programme, la liste des jours que vous avez marqués comme terminés, l’étape atteinte dans chaque journée et la taille de texte choisie.</p>'+
   '<h2>Les audios et vidéos</h2><p>Les contenus audio et vidéo sont diffusés par YouTube dans un lecteur intégré à EMMA. Le lecteur ne se charge que lorsque vous choisissez de lancer un contenu. À partir de ce moment, votre appareil contacte YouTube, qui peut recevoir votre adresse IP et des informations techniques, et utiliser des cookies selon ses règles de confidentialité. La lecture nécessite une connexion Internet. Si un contenu ne fonctionne pas dans EMMA, un lien permet de l’ouvrir sur YouTube.</p>'+
   '<h2>Effacer mes informations</h2><p>Cela remet votre progression à zéro sur cet appareil.</p><button class="danger" id="rst">Effacer ma progression</button><h2>Verrouiller l’application</h2><p>Le code d’accès sera à nouveau demandé.</p><button class="danger" id="lk">Verrouiller l’application</button></main>';
   document.getElementById('lk').onclick=function(){E=null;store.del('k');if(location.hash==='#/info')location.hash='#/';else route()};
-  document.getElementById('rst').onclick=function(){if(confirm('Effacer votre progression sur cet appareil ?')){done=[];store.del('done');store.del('size');size=0;applySize();location.hash='#/'}}}
+  document.getElementById('rst').onclick=function(){if(confirm('Effacer votre progression sur cet appareil ?')){done=[];position={};store.del('done');store.del('position');store.del('size');size=0;applySize();location.hash='#/'}}}
 
 function route(){
   if(!E){if(location.hash==='#/info')info();else gate();window.scrollTo(0,0);return}
