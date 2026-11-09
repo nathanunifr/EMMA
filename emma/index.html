@@ -314,7 +314,7 @@ function refreshContent(){
  fetch('content.enc.js',{cache:'no-store'}).then(function(r){
    if(!r.ok)throw Error('Contenu indisponible');return r.text();
  }).then(function(source){
-   var match=source.trim().match(/^window\\.EMMA_ENC\\s*=\\s*(\\{[\\s\\S]*\\})\\s*;?\\s*$/);
+   var match=source.trim().match(/^window\.EMMA_ENC\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
    if(!match)return;
    var fresh=JSON.parse(match[1]);
    if(!fresh||!fresh.data||!fresh.iv||!fresh.salt||fresh.data===X.data)return;
