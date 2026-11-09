@@ -1,147 +1,202 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer"><title>Administration · EMMA</title>
+<meta name="referrer" content="no-referrer"><title>EMMA · Administration</title>
 <style>
-:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color:#17332e;background:#f1f7f4}*{box-sizing:border-box}
-body{margin:0}header{background:#153d35;color:white;padding:1.2rem max(1rem,calc((100% - 980px)/2));display:flex;justify-content:space-between;align-items:center;gap:1rem}
-header a{color:#d3f3e5}main{max-width:980px;margin:1.5rem auto;padding:0 1rem 4rem}h1{font-size:1.5rem;margin:.2rem 0}h2{font-size:1.1rem}
-.card{background:white;padding:1.3rem;border:1px solid #d5e4db;border-radius:16px;margin-bottom:1rem;box-shadow:0 4px 18px #183e3210}
-label{display:block;font-weight:650;margin:.75rem 0 .3rem}input,select,textarea{width:100%;font:inherit;padding:.7rem;border:1px solid #a6c4b7;border-radius:9px;background:white;color:#17332e}
-button,.button{display:inline-block;border:0;border-radius:9px;padding:.7rem 1rem;font:inherit;font-weight:650;cursor:pointer;background:#17644d;color:white;text-decoration:none}
-button:disabled{opacity:.45;cursor:not-allowed}.muted{color:#536b63;font-size:.93rem}.row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
-.row>*{flex:1}.row button{flex:0 0 auto}.secondary{background:#e5f2eb;color:#1c5645}.warn{background:#fff5e6;border-color:#e0b56d}
-[hidden]{display:none!important}.editor{min-height:260px;border:2px solid #b5d7c3;background:white;padding:1.2rem;border-radius:12px;outline-offset:4px}
-.editor:focus{border-color:#17644d}.editor .box{padding:1rem;border:1px solid #afd5b6;background:#eff9f1;border-radius:12px;margin:1rem 0}
-.editor .t-ecrit{background:#fff8ed;border-color:#dfc49b}.editor .t-audio{background:#f4f0fb;border-color:#cbbde1}
-.editor img{max-width:100%}.editor h2,.editor h3{line-height:1.3}.editor a{color:#17644d}
-#status{min-height:1.8rem;font-weight:600}code{overflow-wrap:anywhere}small{font-weight:400}
+:root{font:16px/1.5 system-ui,-apple-system,sans-serif;color:#183d33;background:#f2f7f3}*{box-sizing:border-box}
+body{margin:0}header{background:#153d35;color:white;padding:1rem max(1rem,calc((100% - 1100px)/2));display:flex;justify-content:space-between;gap:1rem}header a{color:#dbf6e8}
+main{max-width:1100px;margin:auto;padding:1.5rem 1rem 4rem}h1{font-size:1.65rem}h2{font-size:1.17rem;margin:.3rem 0 .8rem}
+.card{background:white;border:1px solid #d4e5d9;border-radius:16px;padding:1.1rem;margin-bottom:1rem}
+input,select,textarea{width:100%;border:1px solid #a4c5b3;border-radius:9px;padding:.65rem;font:inherit;color:inherit;background:white}
+label{display:block;font-weight:650;margin:.8rem 0 .3rem}button{border:0;background:#17624d;color:white;border-radius:9px;padding:.65rem .85rem;font:inherit;font-weight:650;cursor:pointer}
+button.secondary{background:#e5f1e9;color:#205642}button.danger{background:#fff0ed;color:#9b3828}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap}.row>*{flex:1}.row button{flex:0 0 auto}
+.muted{color:#587164;font-size:.92rem}.grid{display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start}
+.blk{border:1px solid #c5dcd0;background:#f8fbf8;border-radius:13px;margin:.75rem 0;padding:.9rem}
+.blk .top{display:flex;gap:.4rem;justify-content:space-between;align-items:center;flex-wrap:wrap}.blk .top strong{flex:1}
+.blk .actions{display:flex;gap:.35rem;flex-wrap:wrap}.blk .actions button{padding:.32rem .55rem;font-size:.85rem}
+.blk .edit{min-height:58px;border:1px solid #c5dcd0;background:#fff;border-radius:8px;padding:.8rem;margin:.6rem 0;outline-offset:3px}
+.blk .edit:focus{outline:2px solid #75a991}.blk .edit .box{border:1px solid #a8d8b0;background:#eff9f0;border-radius:12px;padding:1rem;margin:.6rem 0}
+.blk .edit .t-ecrit{background:#fff7e9}.blk .edit .t-audio{background:#f3effb}
+.blk .edit img{max-width:100%}.blk textarea{min-height:105px}
+.sep{border-top:2px dashed #8eb6a2;margin:1.4rem 0 .75rem;padding-top:.8rem}
+.tiny{font-size:.82rem}#status{font-weight:650;white-space:pre-wrap}#workspace[hidden],#unlock[hidden],#missing[hidden]{display:none}
+.preview{padding:1rem;background:#f7faf8;border:1px solid #d7e4db;border-radius:12px;overflow-wrap:anywhere}
+.preview .box{padding:1rem;border:1px solid #afd5b6;background:#eff9f1;border-radius:12px;margin:.8rem 0}.preview img{max-width:100%}
+.preview iframe{width:100%;aspect-ratio:16/9;border:0}
+@media(max-width:770px){.grid{grid-template-columns:1fr}}
 </style></head><body>
-<header><strong>EMMA · Administration</strong><a href="./">← Retour à la plateforme</a></header>
-<main><h1>Modifier les journées</h1>
-<p class="muted">Cet outil fonctionne sur votre appareil. Les contenus restent chiffrés lors de leur publication. L’accès au programme ne suffit pas pour publier : seul un compte GitHub autorisé peut le faire.</p>
-<section class="card" id="unlock"><h2>1. Ouvrir les contenus</h2>
-<label for="code">Code d’accès au programme</label><input type="password" id="code" autocomplete="off" placeholder="Code remis pour EMMA">
-<div class="row" style="margin-top:1rem"><button id="open">Ouvrir l’éditeur</button></div>
-<p id="unlockError" role="alert"></p>
+<header><strong>EMMA · Administration</strong><a href="./">← Plateforme participants</a></header>
+<main><h1>Éditeur des journées</h1><p class="muted">Réorganisez les blocs, ajoutez des encadrés et placez les boutons « Découvrir la suite » où vous le souhaitez. Les modifications ne deviennent visibles qu'après enregistrement sur GitHub.</p>
+<section class="card" id="unlock">
+<h2>Accès administrateur</h2>
+<label for="adminCode">Code administrateur</label><input id="adminCode" type="password" autocomplete="off">
+<label for="programCode">Code d'accès au programme (pour déchiffrer les modules)</label><input id="programCode" type="password" autocomplete="off">
+<p class="muted">Deux codes distincts sont nécessaires : le code administrateur ouvre l'interface ; le code du programme déchiffre les textes existants, sans exposer la clé dans le site public.</p>
+<button id="open">Ouvrir l'éditeur</button><p id="error" role="alert"></p>
 </section>
-<section class="card warn" id="missing" hidden><h2>Contenu introuvable</h2><p>Le fichier chiffré <code>content.enc.js</code> n’est pas présent ou est vide. Aucun contenu ne sera remplacé.</p><p>Restaurez d’abord ce fichier depuis l’historique GitHub du dépôt EMMA, puis rechargez cette page.</p></section>
+<section class="card" id="missing" hidden><strong>Contenu indisponible</strong><p>Le fichier chiffré est absent ou illisible. Aucune modification ne sera publiée pour éviter d'écraser le programme existant.</p></section>
 <div id="workspace" hidden>
-<section class="card"><h2>2. Choisir le texte</h2>
-<div class="row"><div><label for="day">Journée</label><select id="day"></select></div><div><label for="step">Étape</label><select id="step"></select></div></div>
-<label for="dayTitle">Titre de la journée</label><input id="dayTitle" type="text">
-<p class="muted">Cliquez directement sur les phrases dans la zone ci-dessous et corrigez-les comme dans un document. Les encadrés et titres sont conservés. Utilisez les menus pour changer d’étape.</p>
-<div class="editor" id="editor" contenteditable="true" aria-label="Texte modifiable"></div>
-<p class="muted">Évitez de supprimer les encadrés entiers. La mise en page et les liens sont conservés lors des corrections de texte simples.</p>
-<div class="row"><button class="secondary" id="prev">← Étape précédente</button><button class="secondary" id="next">Étape suivante →</button></div>
-<p id="dirtyMsg" class="muted"></p></section>
-<section class="card"><h2>3. Enregistrer / publier</h2>
-<p>Vérifiez vos corrections avant publication. Le bouton Télécharger crée une sauvegarde chiffrée, même si vous ne souhaitez pas publier immédiatement.</p>
-<div class="row"><button id="download" class="secondary">Télécharger une sauvegarde chiffrée</button></div>
-<details style="margin-top:1.2rem"><summary><strong>Publier directement sur GitHub (propriétaire uniquement)</strong></summary>
-<p class="muted">Créez un jeton d’accès fin GitHub autorisé uniquement sur le dépôt <code>nathanunifr/EMMA</code>, avec l’autorisation <strong>Contents: Read and write</strong>. Le jeton n’est ni conservé ni envoyé ailleurs qu’à l’API GitHub.</p>
-<label for="token">Jeton GitHub temporaire</label><input type="password" id="token" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
-<button id="publish" style="margin-top:.8rem">Publier les modifications</button>
-</details><p id="status" role="status" aria-live="polite"></p>
-</section>
-</div></main>
+<div class="grid"><aside class="card">
+<h2>Choisir une journée</h2><label for="day">Journée</label><select id="day"></select>
+<label for="dayTitle">Titre de la journée</label><input id="dayTitle">
+<p class="muted">Un bloc = une unité que vous pouvez modifier ou déplacer. La barre de séparation représente le bouton « Découvrir la suite ».</p>
+<label for="newType">Nouveau bloc</label><select id="newType">
+<option value="text">Texte libre</option><option value="title">Titre / sous-titre</option>
+<option value="pratique">Encadré pratique (vert)</option><option value="ecrit">Encadré exercice écrit</option>
+<option value="audio">Encadré audio</option><option value="video">Vidéo YouTube</option>
+<option value="image">Image</option>
+<option value="recap">Encadré récapitulatif</option></select>
+<button id="addBlock" style="margin-top:.6rem;width:100%">+ Ajouter un bloc</button>
+<button id="addStep" class="secondary" style="margin-top:.5rem;width:100%">+ Ajouter « Découvrir la suite »</button>
+<hr><label for="token">Autorisation GitHub (jeton personnel)</label>
+<input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+<p class="muted tiny">Une seule saisie par session. Jeton limité au dépôt nathanunifr/EMMA, permission Contents: Read and write. Il n'est pas sauvegardé sur l'appareil.</p>
+<button id="save" style="width:100%">Enregistrer et publier sur GitHub</button>
+<button id="download" class="secondary" style="margin-top:.55rem;width:100%">Télécharger une sauvegarde chiffrée</button>
+<p id="status" role="status"></p><p id="dirty" class="muted"></p>
+</aside>
+<section class="card"><h2>Contenu et ordre d'apparition</h2>
+<div id="blocks"></div>
+<details><summary><strong>Aperçu de la journée</strong></summary><div id="preview" class="preview"></div></details>
+</section></div></div></main>
 <script src="content.enc.js"></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),repo='nathanunifr/EMMA',file='emma/content.enc.js';
-let E=null,keyBytes=null,currentDay=null,currentStep=0,changed=false;
+let E=null,rawKey=null,current=0,dirty=false,blocks=[],labels=[];
 const X=window.EMMA_ENC;
 const from64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const to64=bytes=>{let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(s)};
-const normalized=s=>s.replace(/\s+/g,'').replace(/[\u2010-\u2015\u2212]/g,'-').toUpperCase();
-async function derive(code){
- const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(normalized(code)),'PBKDF2',false,['deriveBits']);
- return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:from64(X.salt),iterations:X.iter},base,256));
-}
-async function aes(raw){return crypto.subtle.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt'])}
+const to64=a=>{let s='';for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(s)};
+const norm=s=>s.replace(/\s+/g,'').replace(/[\u2010-\u2015\u2212]/g,'-').toUpperCase();
+const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mark=()=>{dirty=true;$('dirty').textContent='Modifications non publiées';};
+async function derive(code){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(norm(code)),'PBKDF2',false,['deriveBits']);return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:from64(X.salt),iterations:X.iter},base,256))}
+async function key(bytes){return crypto.subtle.importKey('raw',bytes,'AES-GCM',false,['encrypt','decrypt'])}
+async function validAdmin(code){const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(code));return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('')==='2e273998486cb543e926f1bc598958e756523f4abe2e5ae89fce36ef62c7ebc8'}
 async function unlock(){
- $('unlockError').textContent='';
- if(!X||!X.data||!X.salt||!X.iv){$('missing').hidden=false;$('unlockError').textContent='Impossible de charger les données EMMA.';return}
+ $('error').textContent='';
+ if(!await validAdmin($('adminCode').value)){$('error').textContent='Code administrateur incorrect.';return}
+ if(!X||!X.data||!X.salt||!X.iv){$('missing').hidden=false;$('error').textContent='Le contenu chiffré est inaccessible.';return}
  try{
-  let kb=await derive($('code').value),k=await aes(kb);
-  let clear=await crypto.subtle.decrypt({name:'AES-GCM',iv:from64(X.iv)},k,from64(X.data));
-  let data=JSON.parse(new TextDecoder().decode(clear));
-  if(!Array.isArray(data.jours)||!Array.isArray(data.modules))throw Error('Structure invalide');
-  E=data;keyBytes=kb;$('code').value='';$('unlock').hidden=true;$('workspace').hidden=false;
-  $('day').innerHTML='';
-  E.jours.forEach((d,i)=>{let o=new Option('Jour '+d.n+' · '+d.titre,i);$('day').add(o)});
-  chooseDay(0);status('Éditeur ouvert. Aucune modification publiée.');
- }catch(e){$('unlockError').textContent='Code incorrect ou contenu illisible. Vérifiez le code et le fichier.'}
+  const derived=await derive($('programCode').value);
+  const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:from64(X.iv)},await key(derived),from64(X.data));
+  const parsed=JSON.parse(new TextDecoder().decode(plain));
+  if(!Array.isArray(parsed.jours)||!Array.isArray(parsed.modules))throw Error('Structure invalide');
+  E=parsed;rawKey=derived;$('adminCode').value='';$('programCode').value='';
+  $('unlock').hidden=true;$('workspace').hidden=false;
+  E.jours.forEach((d,i)=>$('day').add(new Option('Jour '+d.n+' · '+d.titre,i)));
+  loadDay(0);status('Contenus chargés. Aucun changement publié.');
+ }catch(e){$('error').textContent='Code du programme incorrect ou données non lisibles.'}
 }
-function steps(d){return Array.isArray(d.steps)&&d.steps.length?d.steps:[d.html||'']}
-function chooseDay(i){commitEditor();currentDay=Number(i);currentStep=0;renderDay()}
-function renderDay(){
- const d=E.jours[currentDay],parts=steps(d);
- $('day').value=String(currentDay);$('dayTitle').value=d.titre;
- $('step').innerHTML='';parts.forEach((part,i)=>$('step').add(new Option('Étape '+(i+1),i)));
- renderStep();
+function parseHTML(html){const holder=document.createElement('div');holder.innerHTML=html||'';return Array.from(holder.childNodes).filter(n=>n.nodeType===1||n.nodeType===3&&n.textContent.trim()).map(n=>n.nodeType===3?'<p>'+escape(n.textContent)+'</p>':n.outerHTML)}
+function readDay(d){
+ let steps=Array.isArray(d.steps)&&d.steps.length?d.steps:[d.html||''];
+ const out=[];steps.forEach((step,i)=>{if(i)out.push({type:'break',label:(d.stepLabels||[])[i-1]||'Découvrir la suite'});parseHTML(step).forEach(h=>out.push({type:'html',html:h}))});
+ return out.length?out:[{type:'html',html:'<p></p>'}]
 }
-function renderStep(){
- let parts=steps(E.jours[currentDay]);$('step').value=String(currentStep);
- $('editor').innerHTML=parts[currentStep]||'';
- $('prev').disabled=currentStep===0;$('next').disabled=currentStep===parts.length-1;
- $('dirtyMsg').textContent=changed?'Modifications non publiées':'';
+function commit(){if(!E)return;
+ const d=E.jours[current];d.titre=$('dayTitle').value;
+ let steps=[''],buttonLabels=[];
+ blocks.forEach(b=>{if(b.type==='break'){if(steps[steps.length-1].trim()){buttonLabels.push(b.label||'Découvrir la suite');steps.push('')} }else steps[steps.length-1]+=b.html+'\n'});
+ if(!steps[steps.length-1].trim()&&steps.length>1){steps.pop();buttonLabels.pop()}
+ if(!steps.length)steps=['<p></p>'];
+ d.steps=steps;d.stepLabels=buttonLabels;
 }
-function commitEditor(){
- if(!E||currentDay===null)return;
- const d=E.jours[currentDay],html=$('editor').innerHTML;
- if(Array.isArray(d.steps)&&d.steps.length){
-  if(d.steps[currentStep]!==html){d.steps[currentStep]=html;changed=true}
- }else if((d.html||'')!==html){d.html=html;changed=true}
- if(d.titre!==$('dayTitle').value){d.titre=$('dayTitle').value;changed=true}
+function loadDay(i){commit();current=Number(i);const d=E.jours[current];$('day').value=String(current);$('dayTitle').value=d.titre;blocks=readDay(d);render()}
+function blockType(h){
+ if(/class=["'][^"']*\bbox\b[^"']*\bt-pratique\b/.test(h))return '🟢 Exercice pratique';
+ if(/class=["'][^"']*\bbox\b[^"']*\bt-ecrit\b/.test(h))return '✍️ Exercice écrit';
+ if(/class=["'][^"']*\bbox\b[^"']*\bt-recap\b/.test(h))return '🔁 Récapitulatif';
+ if(/class=["'][^"']*\bbox\b/.test(h))return '▣ Encadré';
+ if(/<iframe|youtu\.?be|youtube\.com/.test(h))return '🎬 Vidéo';
+ if(/<img\b/.test(h))return '🖼️ Image';
+ if(/^<h[1-6]\b/.test(h))return 'T Titre';
+ return '¶ Texte';
 }
-function switchStep(i){commitEditor();currentStep=Number(i);renderStep()}
-$('open').addEventListener('click',unlock);
-$('code').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
-$('day').addEventListener('change',e=>chooseDay(e.target.value));
-$('step').addEventListener('change',e=>switchStep(e.target.value));
-$('prev').addEventListener('click',()=>switchStep(currentStep-1));
-$('next').addEventListener('click',()=>switchStep(currentStep+1));
-$('editor').addEventListener('input',()=>{changed=true;$('dirtyMsg').textContent='Modifications non publiées'});
-$('dayTitle').addEventListener('input',()=>{changed=true;$('dirtyMsg').textContent='Modifications non publiées'});
-$('editor').addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
-function status(s){$('status').textContent=s}
-async function encryptedContent(){
- commitEditor();
- const iv=crypto.getRandomValues(new Uint8Array(12)),k=await aes(keyBytes);
- const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(JSON.stringify(E)));
- const output={...X,iv:to64(iv),data:to64(new Uint8Array(encrypted))};
- return 'window.EMMA_ENC='+JSON.stringify(output)+';\n';
+function render(){
+ const root=$('blocks');root.replaceChildren();
+ let step=1;
+ blocks.forEach((b,i)=>{
+  if(b.type==='break'){
+   const el=document.createElement('div');el.className='sep';
+   el.innerHTML='<div class="row"><strong>Étape '+(++step)+' · bouton de transition</strong><button type="button" class="secondary" data-act="up">↑</button><button type="button" class="secondary" data-act="down">↓</button><button type="button" class="danger" data-act="remove">Supprimer</button></div><label>Texte du bouton précédant cette étape</label><input class="labelInput" placeholder="Découvrir la suite">';
+   el.querySelector('input').value=b.label;
+   el.querySelector('input').addEventListener('input',e=>{b.label=e.target.value;mark();preview()});
+   wire(el,i);root.appendChild(el);return;
+  }
+  const el=document.createElement('div');el.className='blk';
+  el.innerHTML='<div class="top"><strong>'+escape(blockType(b.html))+'</strong><div class="actions"><button class="secondary" data-act="up" title="Monter">↑</button><button class="secondary" data-act="down" title="Descendre">↓</button><button class="secondary" data-act="duplicate">Dupliquer</button><button class="danger" data-act="remove">Supprimer</button></div></div><div class="edit" contenteditable="true" spellcheck="true" aria-label="Contenu du bloc"></div><details><summary class="tiny">Modifier le HTML (liens, vidéos, structure)</summary><textarea aria-label="HTML de ce bloc"></textarea></details>';
+  const editor=el.querySelector('.edit'),source=el.querySelector('textarea');
+  editor.innerHTML=b.html;source.value=b.html;
+  editor.addEventListener('input',()=>{b.html=editor.innerHTML;source.value=b.html;mark();preview()});
+  editor.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
+  source.addEventListener('input',()=>{b.html=source.value;editor.innerHTML=b.html;mark();preview()});
+  wire(el,i);root.appendChild(el);
+ });
+ preview();
 }
-$('download').addEventListener('click',async()=>{
- try{const txt=await encryptedContent(),blob=new Blob([txt],{type:'text/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download='content.enc.js';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
- status('Sauvegarde chiffrée téléchargée. Pour publier manuellement, remplacez emma/content.enc.js sur GitHub.');}
- catch(e){status('Erreur de sauvegarde : '+e.message)}
-});
-$('publish').addEventListener('click',async()=>{
- if(!E)return;
- const token=$('token').value.trim();
- if(!token){status('Saisissez un jeton GitHub pour publier.');return}
- if(!confirm('Publier vos modifications pour tous les participants ?'))return;
- $('publish').disabled=true;status('Publication en cours…');
+function wire(el,i){
+ el.querySelectorAll('[data-act]').forEach(btn=>btn.onclick=()=>{
+  const act=btn.dataset.act;
+  if(act==='remove'){if(!confirm('Supprimer ce bloc ou ce bouton ?'))return;blocks.splice(i,1)}
+  if(act==='duplicate')blocks.splice(i+1,0,{...blocks[i]});
+  if(act==='up'&&i>0)[blocks[i-1],blocks[i]]=[blocks[i],blocks[i-1]];
+  if(act==='down'&&i<blocks.length-1)[blocks[i+1],blocks[i]]=[blocks[i],blocks[i+1]];
+  mark();render();
+ });
+}
+function preview(){
+ let h='',n=1;blocks.forEach(b=>{if(b.type==='break'){h+='<hr><p><strong>Étape '+(++n)+'</strong> · '+escape(b.label||'Découvrir la suite')+'</p>'}else h+=b.html});
+ const box=$('preview');box.innerHTML=h;
+ box.querySelectorAll('script').forEach(n=>n.remove());
+ box.querySelectorAll('a[href]').forEach(a=>{a.removeAttribute('target');a.onclick=e=>e.preventDefault()});
+}
+function addBlock(type){
+ const content={
+  text:'<p>Votre texte ici.</p>',
+  title:'<h3>Votre sous-titre</h3>',
+  pratique:'<div class="box t-pratique"><div class="box-h">Exercice pratique</div><p>Consignes de l’exercice.</p></div>',
+  ecrit:'<div class="box t-ecrit"><div class="box-h">Exercice écrit</div><p>Votre consigne ici.</p></div>',
+  audio:'<div class="box t-audio"><div class="box-h">Audio</div><p>Écouter le guide : <a href="https://www.youtube.com/watch?v=REMPLACER">Lien audio</a></p></div>',
+  video:'<div class="box t-video"><div class="box-h">Vidéo</div><p><a href="https://www.youtube.com/watch?v=REMPLACER">Voir la vidéo</a></p></div>',
+  image:'<figure><img src="https://example.org/image.jpg" alt="Description de l’image"><figcaption>Légende de l’image</figcaption></figure>',
+  recap:'<div class="box t-recap"><div class="box-h">À retenir</div><p>Le point essentiel.</p></div>'
+ };
+ blocks.push({type:'html',html:content[type]||content.text});mark();render();
+ $('blocks').lastElementChild?.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function status(msg){$('status').textContent=msg}
+async function encrypted(){
+ commit();const iv=crypto.getRandomValues(new Uint8Array(12)),k=await key(rawKey);
+ const bytes=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(JSON.stringify(E)));
+ return 'window.EMMA_ENC='+JSON.stringify({...X,iv:to64(iv),data:to64(new Uint8Array(bytes))})+';\n';
+}
+$('open').onclick=unlock;
+$('day').onchange=e=>loadDay(e.target.value);
+$('dayTitle').oninput=()=>{mark();$('day').selectedOptions[0].text='Jour '+E.jours[current].n+' · '+$('dayTitle').value};
+$('addBlock').onclick=()=>addBlock($('newType').value);
+$('addStep').onclick=()=>{if(blocks.length&&blocks[blocks.length-1].type==='break'){status('Ajoutez un bloc après le dernier bouton avant de créer une autre étape.');return}blocks.push({type:'break',label:'Découvrir la suite'});blocks.push({type:'html',html:'<p>Nouvelle étape.</p>'});mark();render()};
+$('download').onclick=async()=>{try{const blob=new Blob([await encrypted()],{type:'text/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='content.enc.js';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);status('Sauvegarde chiffrée téléchargée.')}catch(e){status('Sauvegarde impossible : '+e.message)}};
+$('save').onclick=async()=>{
+ if(!E)return;const token=$('token').value.trim();
+ if(!token){status('Saisissez d’abord votre autorisation GitHub. Elle permet la publication directe, sans remplacer de fichier manuellement.');return}
+ if(!confirm('Enregistrer et publier ces changements pour les participants ?'))return;
+ $('save').disabled=true;status('Enregistrement sur GitHub…');
  try{
-  const base='https://api.github.com/repos/'+repo+'/contents/'+file;
+  const url='https://api.github.com/repos/'+repo+'/contents/'+file;
   const headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
-  const check=await fetch(base+'?ref=main&ts='+Date.now(),{headers,cache:'no-store'});
-  if(!check.ok)throw Error('Accès GitHub refusé ('+check.status+'). Vérifiez les permissions du jeton.');
-  const item=await check.json();
-  if(!item.sha)throw Error('SHA du fichier introuvable.');
-  const updated=await encryptedContent();
-  const bytes=new TextEncoder().encode(updated);
-  const body={message:'EMMA: modifications des contenus depuis l’administration',content:to64(bytes),sha:item.sha,branch:'main'};
-  const resp=await fetch(base,{method:'PUT',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!resp.ok){let err=await resp.text();throw Error('Publication refusée ('+resp.status+') : '+err.slice(0,180))}
-  changed=false;$('dirtyMsg').textContent='';$('token').value='';
-  status('Publication réussie sur GitHub. La plateforme se mettra à jour après son déploiement.');
- }catch(e){status('Publication non effectuée : '+e.message)}
- finally{$('publish').disabled=false}
-});
-window.addEventListener('beforeunload',e=>{if(changed){e.preventDefault();e.returnValue=''}});
+  const chk=await fetch(url+'?ref=main&t='+Date.now(),{headers,cache:'no-store'});
+  if(!chk.ok)throw Error('Accès GitHub refusé ('+chk.status+').');
+  const prev=await chk.json();if(!prev.sha)throw Error('Impossible de vérifier la version GitHub.');
+  const content=await encrypted();
+  const body={message:'EMMA: édition des blocs et étapes',content:to64(new TextEncoder().encode(content)),sha:prev.sha,branch:'main'};
+  const response=await fetch(url,{method:'PUT',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!response.ok)throw Error('GitHub a refusé la publication ('+response.status+'). '+(await response.text()).slice(0,150));
+  dirty=false;$('dirty').textContent='';status('✓ Enregistré sur GitHub. Les changements apparaîtront sur la plateforme après le déploiement GitHub Pages.');
+ }catch(e){status('Aucune publication effectuée : '+e.message)}
+ finally{$('save').disabled=false}
+};
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
 if(!X||!X.data)$('missing').hidden=false;
 })();
 </script></body></html>
