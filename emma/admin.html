@@ -179,12 +179,13 @@ $('addStep').onclick=()=>{if(blocks.length&&blocks[blocks.length-1].type==='brea
 $('download').onclick=async()=>{try{const blob=new Blob([await encrypted()],{type:'text/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='content.enc.js';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);status('Sauvegarde chiffrée téléchargée.')}catch(e){status('Sauvegarde impossible : '+e.message)}};
 $('save').onclick=async()=>{
  if(!E)return;
- // Enlever espaces et caractères invisibles fréquemment introduits par le copier-coller.
+ // Nettoyer les espaces et caractères invisibles de copier-coller.
+ // Ne pas imposer de préfixe : GitHub peut utiliser plusieurs formats de jetons.
  const raw=$('token').value;
- const token=raw.replace(/[\\s\\u200B-\\u200D\\u2060\\uFEFF]/g,'');
+ const token=raw.replace(/[\s\u200B-\u200D\u2060\uFEFF]/g,'');
  if(!token){status('Collez votre jeton personnel GitHub dans le champ Autorisation GitHub.');return}
- if(!/^(github_pat_|ghp_)[A-Za-z0-9_]+$/.test(token)){
-   status('Jeton GitHub non valide : copiez uniquement le code complet commençant par github_pat_ ou ghp_, sans guillemets, points de suspension ni autre texte.');
+ if(/[^\x21-\x7E]/.test(token)){
+   status('Le jeton contient un caractère spécial incompatible. Copiez uniquement le jeton depuis GitHub (sans ponctuation ni autre texte).');
    return;
  }
  $('token').value=token;
