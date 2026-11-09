@@ -63,7 +63,7 @@ button.secondary{background:#e5f1e9;color:#205642}button.danger{background:#fff0
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),repo='nathanunifr/EMMA',file='emma/content.enc.js';
-let E=null,rawKey=null,current=0,dirty=false,blocks=[],labels=[];
+let E=null,rawKey=null,current=null,dirty=false,blocks=[];
 const X=window.EMMA_ENC;
 const from64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const to64=a=>{let s='';for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(s)};
@@ -94,7 +94,7 @@ function readDay(d){
  const out=[];steps.forEach((step,i)=>{if(i)out.push({type:'break',label:(d.stepLabels||[])[i-1]||'Découvrir la suite'});parseHTML(step).forEach(h=>out.push({type:'html',html:h}))});
  return out.length?out:[{type:'html',html:'<p></p>'}]
 }
-function commit(){if(!E)return;
+function commit(){if(!E||current===null)return;
  const d=E.jours[current];d.titre=$('dayTitle').value;
  let steps=[''],buttonLabels=[];
  blocks.forEach(b=>{if(b.type==='break'){if(steps[steps.length-1].trim()){buttonLabels.push(b.label||'Découvrir la suite');steps.push('')} }else steps[steps.length-1]+=b.html+'\n'});
