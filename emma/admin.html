@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer"><title>Administration · EMMA</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color:#17332e;background:#f1f7f4}*{box-sizing:border-box}
+body{margin:0}header{background:#153d35;color:white;padding:1.2rem max(1rem,calc((100% - 980px)/2));display:flex;justify-content:space-between;align-items:center;gap:1rem}
+header a{color:#d3f3e5}main{max-width:980px;margin:1.5rem auto;padding:0 1rem 4rem}h1{font-size:1.5rem;margin:.2rem 0}h2{font-size:1.1rem}
+.card{background:white;padding:1.3rem;border:1px solid #d5e4db;border-radius:16px;margin-bottom:1rem;box-shadow:0 4px 18px #183e3210}
+label{display:block;font-weight:650;margin:.75rem 0 .3rem}input,select,textarea{width:100%;font:inherit;padding:.7rem;border:1px solid #a6c4b7;border-radius:9px;background:white;color:#17332e}
+button,.button{display:inline-block;border:0;border-radius:9px;padding:.7rem 1rem;font:inherit;font-weight:650;cursor:pointer;background:#17644d;color:white;text-decoration:none}
+button:disabled{opacity:.45;cursor:not-allowed}.muted{color:#536b63;font-size:.93rem}.row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+.row>*{flex:1}.row button{flex:0 0 auto}.secondary{background:#e5f2eb;color:#1c5645}.warn{background:#fff5e6;border-color:#e0b56d}
+[hidden]{display:none!important}.editor{min-height:260px;border:2px solid #b5d7c3;background:white;padding:1.2rem;border-radius:12px;outline-offset:4px}
+.editor:focus{border-color:#17644d}.editor .box{padding:1rem;border:1px solid #afd5b6;background:#eff9f1;border-radius:12px;margin:1rem 0}
+.editor .t-ecrit{background:#fff8ed;border-color:#dfc49b}.editor .t-audio{background:#f4f0fb;border-color:#cbbde1}
+.editor img{max-width:100%}.editor h2,.editor h3{line-height:1.3}.editor a{color:#17644d}
+#status{min-height:1.8rem;font-weight:600}code{overflow-wrap:anywhere}small{font-weight:400}
+</style></head><body>
+<header><strong>EMMA · Administration</strong><a href="./">← Retour à la plateforme</a></header>
+<main><h1>Modifier les journées</h1>
+<p class="muted">Cet outil fonctionne sur votre appareil. Les contenus restent chiffrés lors de leur publication. L’accès au programme ne suffit pas pour publier : seul un compte GitHub autorisé peut le faire.</p>
+<section class="card" id="unlock"><h2>1. Ouvrir les contenus</h2>
+<label for="code">Code d’accès au programme</label><input type="password" id="code" autocomplete="off" placeholder="Code remis pour EMMA">
+<div class="row" style="margin-top:1rem"><button id="open">Ouvrir l’éditeur</button></div>
+<p id="unlockError" role="alert"></p>
+</section>
+<section class="card warn" id="missing" hidden><h2>Contenu introuvable</h2><p>Le fichier chiffré <code>content.enc.js</code> n’est pas présent ou est vide. Aucun contenu ne sera remplacé.</p><p>Restaurez d’abord ce fichier depuis l’historique GitHub du dépôt EMMA, puis rechargez cette page.</p></section>
+<div id="workspace" hidden>
+<section class="card"><h2>2. Choisir le texte</h2>
+<div class="row"><div><label for="day">Journée</label><select id="day"></select></div><div><label for="step">Étape</label><select id="step"></select></div></div>
+<label for="dayTitle">Titre de la journée</label><input id="dayTitle" type="text">
+<p class="muted">Cliquez directement sur les phrases dans la zone ci-dessous et corrigez-les comme dans un document. Les encadrés et titres sont conservés. Utilisez les menus pour changer d’étape.</p>
+<div class="editor" id="editor" contenteditable="true" aria-label="Texte modifiable"></div>
+<p class="muted">Évitez de supprimer les encadrés entiers. La mise en page et les liens sont conservés lors des corrections de texte simples.</p>
+<div class="row"><button class="secondary" id="prev">← Étape précédente</button><button class="secondary" id="next">Étape suivante →</button></div>
+<p id="dirtyMsg" class="muted"></p></section>
+<section class="card"><h2>3. Enregistrer / publier</h2>
+<p>Vérifiez vos corrections avant publication. Le bouton Télécharger crée une sauvegarde chiffrée, même si vous ne souhaitez pas publier immédiatement.</p>
+<div class="row"><button id="download" class="secondary">Télécharger une sauvegarde chiffrée</button></div>
+<details style="margin-top:1.2rem"><summary><strong>Publier directement sur GitHub (propriétaire uniquement)</strong></summary>
+<p class="muted">Créez un jeton d’accès fin GitHub autorisé uniquement sur le dépôt <code>nathanunifr/EMMA</code>, avec l’autorisation <strong>Contents: Read and write</strong>. Le jeton n’est ni conservé ni envoyé ailleurs qu’à l’API GitHub.</p>
+<label for="token">Jeton GitHub temporaire</label><input type="password" id="token" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+<button id="publish" style="margin-top:.8rem">Publier les modifications</button>
+</details><p id="status" role="status" aria-live="polite"></p>
+</section>
+</div></main>
+<script src="content.enc.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),repo='nathanunifr/EMMA',file='emma/content.enc.js';
+let E=null,keyBytes=null,currentDay=null,currentStep=0,changed=false;
+const X=window.EMMA_ENC;
+const from64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const to64=bytes=>{let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(s)};
+const normalized=s=>s.replace(/\s+/g,'').replace(/[\u2010-\u2015\u2212]/g,'-').toUpperCase();
+async function derive(code){
+ const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(normalized(code)),'PBKDF2',false,['deriveBits']);
+ return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:from64(X.salt),iterations:X.iter},base,256));
+}
+async function aes(raw){return crypto.subtle.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt'])}
+async function unlock(){
+ $('unlockError').textContent='';
+ if(!X||!X.data||!X.salt||!X.iv){$('missing').hidden=false;$('unlockError').textContent='Impossible de charger les données EMMA.';return}
+ try{
+  let kb=await derive($('code').value),k=await aes(kb);
+  let clear=await crypto.subtle.decrypt({name:'AES-GCM',iv:from64(X.iv)},k,from64(X.data));
+  let data=JSON.parse(new TextDecoder().decode(clear));
+  if(!Array.isArray(data.jours)||!Array.isArray(data.modules))throw Error('Structure invalide');
+  E=data;keyBytes=kb;$('code').value='';$('unlock').hidden=true;$('workspace').hidden=false;
+  $('day').innerHTML='';
+  E.jours.forEach((d,i)=>{let o=new Option('Jour '+d.n+' · '+d.titre,i);$('day').add(o)});
+  chooseDay(0);status('Éditeur ouvert. Aucune modification publiée.');
+ }catch(e){$('unlockError').textContent='Code incorrect ou contenu illisible. Vérifiez le code et le fichier.'}
+}
+function steps(d){return Array.isArray(d.steps)&&d.steps.length?d.steps:[d.html||'']}
+function chooseDay(i){commitEditor();currentDay=Number(i);currentStep=0;renderDay()}
+function renderDay(){
+ const d=E.jours[currentDay],parts=steps(d);
+ $('day').value=String(currentDay);$('dayTitle').value=d.titre;
+ $('step').innerHTML='';parts.forEach((part,i)=>$('step').add(new Option('Étape '+(i+1),i)));
+ renderStep();
+}
+function renderStep(){
+ let parts=steps(E.jours[currentDay]);$('step').value=String(currentStep);
+ $('editor').innerHTML=parts[currentStep]||'';
+ $('prev').disabled=currentStep===0;$('next').disabled=currentStep===parts.length-1;
+ $('dirtyMsg').textContent=changed?'Modifications non publiées':'';
+}
+function commitEditor(){
+ if(!E||currentDay===null)return;
+ const d=E.jours[currentDay],html=$('editor').innerHTML;
+ if(Array.isArray(d.steps)&&d.steps.length){
+  if(d.steps[currentStep]!==html){d.steps[currentStep]=html;changed=true}
+ }else if((d.html||'')!==html){d.html=html;changed=true}
+ if(d.titre!==$('dayTitle').value){d.titre=$('dayTitle').value;changed=true}
+}
+function switchStep(i){commitEditor();currentStep=Number(i);renderStep()}
+$('open').addEventListener('click',unlock);
+$('code').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
+$('day').addEventListener('change',e=>chooseDay(e.target.value));
+$('step').addEventListener('change',e=>switchStep(e.target.value));
+$('prev').addEventListener('click',()=>switchStep(currentStep-1));
+$('next').addEventListener('click',()=>switchStep(currentStep+1));
+$('editor').addEventListener('input',()=>{changed=true;$('dirtyMsg').textContent='Modifications non publiées'});
+$('dayTitle').addEventListener('input',()=>{changed=true;$('dirtyMsg').textContent='Modifications non publiées'});
+$('editor').addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
+function status(s){$('status').textContent=s}
+async function encryptedContent(){
+ commitEditor();
+ const iv=crypto.getRandomValues(new Uint8Array(12)),k=await aes(keyBytes);
+ const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(JSON.stringify(E)));
+ const output={...X,iv:to64(iv),data:to64(new Uint8Array(encrypted))};
+ return 'window.EMMA_ENC='+JSON.stringify(output)+';\n';
+}
+$('download').addEventListener('click',async()=>{
+ try{const txt=await encryptedContent(),blob=new Blob([txt],{type:'text/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='content.enc.js';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
+ status('Sauvegarde chiffrée téléchargée. Pour publier manuellement, remplacez emma/content.enc.js sur GitHub.');}
+ catch(e){status('Erreur de sauvegarde : '+e.message)}
+});
+$('publish').addEventListener('click',async()=>{
+ if(!E)return;
+ const token=$('token').value.trim();
+ if(!token){status('Saisissez un jeton GitHub pour publier.');return}
+ if(!confirm('Publier vos modifications pour tous les participants ?'))return;
+ $('publish').disabled=true;status('Publication en cours…');
+ try{
+  const base='https://api.github.com/repos/'+repo+'/contents/'+file;
+  const headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+  const check=await fetch(base+'?ref=main&ts='+Date.now(),{headers,cache:'no-store'});
+  if(!check.ok)throw Error('Accès GitHub refusé ('+check.status+'). Vérifiez les permissions du jeton.');
+  const item=await check.json();
+  if(!item.sha)throw Error('SHA du fichier introuvable.');
+  const updated=await encryptedContent();
+  const bytes=new TextEncoder().encode(updated);
+  const body={message:'EMMA: modifications des contenus depuis l’administration',content:to64(bytes),sha:item.sha,branch:'main'};
+  const resp=await fetch(base,{method:'PUT',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!resp.ok){let err=await resp.text();throw Error('Publication refusée ('+resp.status+') : '+err.slice(0,180))}
+  changed=false;$('dirtyMsg').textContent='';$('token').value='';
+  status('Publication réussie sur GitHub. La plateforme se mettra à jour après son déploiement.');
+ }catch(e){status('Publication non effectuée : '+e.message)}
+ finally{$('publish').disabled=false}
+});
+window.addEventListener('beforeunload',e=>{if(changed){e.preventDefault();e.returnValue=''}});
+if(!X||!X.data)$('missing').hidden=false;
+})();
+</script></body></html>
