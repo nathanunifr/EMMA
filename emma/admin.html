@@ -178,8 +178,16 @@ $('addBlock').onclick=()=>addBlock($('newType').value);
 $('addStep').onclick=()=>{if(blocks.length&&blocks[blocks.length-1].type==='break'){status('Ajoutez un bloc après le dernier bouton avant de créer une autre étape.');return}blocks.push({type:'break',label:'Découvrir la suite'});blocks.push({type:'html',html:'<p>Nouvelle étape.</p>'});mark();render()};
 $('download').onclick=async()=>{try{const blob=new Blob([await encrypted()],{type:'text/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='content.enc.js';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);status('Sauvegarde chiffrée téléchargée.')}catch(e){status('Sauvegarde impossible : '+e.message)}};
 $('save').onclick=async()=>{
- if(!E)return;const token=$('token').value.trim();
- if(!token){status('Saisissez d’abord votre autorisation GitHub. Elle permet la publication directe, sans remplacer de fichier manuellement.');return}
+ if(!E)return;
+ // Enlever espaces et caractères invisibles fréquemment introduits par le copier-coller.
+ const raw=$('token').value;
+ const token=raw.replace(/[\\s\\u200B-\\u200D\\u2060\\uFEFF]/g,'');
+ if(!token){status('Collez votre jeton personnel GitHub dans le champ Autorisation GitHub.');return}
+ if(!/^(github_pat_|ghp_)[A-Za-z0-9_]+$/.test(token)){
+   status('Jeton GitHub non valide : copiez uniquement le code complet commençant par github_pat_ ou ghp_, sans guillemets, points de suspension ni autre texte.');
+   return;
+ }
+ $('token').value=token;
  if(!confirm('Enregistrer et publier ces changements pour les participants ?'))return;
  $('save').disabled=true;status('Enregistrement sur GitHub…');
  try{
