@@ -137,7 +137,7 @@ details[open] summary::after{transform:rotate(-135deg)}
 </head>
 <body>
 <div id="app"></div>
-<script src="content.enc.js?v=20261109c"></script>
+<script src="content.enc.js"></script>
 <script>
 (function(){
 var E=null,app=document.getElementById('app');
@@ -306,8 +306,40 @@ function gate(){
 function boot(){
   var k=store.get('k',null);
   if(k&&X&&window.crypto&&crypto.subtle){openWith(fromB64(k)).then(route).catch(function(){store.del('k');route()})}else route()}
+// Vérification des nouvelles publications au lancement et au retour sur l'application.
+var checkingContent=false,lastContentCheck=0;
+function refreshContent(){
+ if(checkingContent||!navigator.onLine)return;
+ checkingContent=true;lastContentCheck=Date.now();
+ fetch('content.enc.js',{cache:'no-store'}).then(function(r){
+   if(!r.ok)throw Error('Contenu indisponible');return r.text();
+ }).then(function(source){
+   var match=source.trim().match(/^window\\.EMMA_ENC\\s*=\\s*(\\{[\\s\\S]*\\})\\s*;?\\s*$/);
+   if(!match)return;
+   var fresh=JSON.parse(match[1]);
+   if(!fresh||!fresh.data||!fresh.iv||!fresh.salt||fresh.data===X.data)return;
+   var k=store.get('k',null);
+   if(!k){X=fresh;window.EMMA_ENC=fresh;return}
+   return crypto.subtle.importKey('raw',fromB64(k),'AES-GCM',false,['decrypt']).then(function(key){
+     return crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(fresh.iv)},key,fromB64(fresh.data));
+   }).then(function(bytes){
+     var parsed=JSON.parse(new TextDecoder().decode(bytes));
+     if(!parsed||!Array.isArray(parsed.jours)||!Array.isArray(parsed.modules))return;
+     X=fresh;window.EMMA_ENC=fresh;E=parsed;
+     var y=window.scrollY;route();window.scrollTo(0,y);
+   });
+ }).catch(function(){/* Garder la version précédente si hors ligne. */})
+ .then(function(){checkingContent=false});
+}
 applySize();window.addEventListener('hashchange',route);boot();
-if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('sw.js').catch(function(){})}
+window.addEventListener('focus',function(){if(Date.now()-lastContentCheck>10000)refreshContent()});
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&Date.now()-lastContentCheck>10000)refreshContent()});
+window.addEventListener('online',refreshContent);
+setInterval(function(){if(!document.hidden&&Date.now()-lastContentCheck>60000)refreshContent()},60000);
+refreshContent();
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
+ navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(reg){reg.update().catch(function(){})}).catch(function(){});
+}
 })();
 </script>
 </body>
