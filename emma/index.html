@@ -218,7 +218,21 @@ function attachInlineMedia(){
 
 // Les journées apparaissent progressivement, sans envoyer de réponses au serveur.
 function slidesFor(d){
-  if(Array.isArray(d.steps)&&d.steps.length)return d.steps;
+  // Le jour 10 présente un seul exercice pratique : conserver ses deux parties
+  // dans le même encadré vert et sur la même étape.
+  if(d.n===10){
+    var combined=document.createElement('div');
+    combined.innerHTML=Array.isArray(d.steps)&&d.steps.length?d.steps.join(''):(d.html||'');
+    var practice=combined.querySelectorAll('.box.t-pratique');
+    if(practice.length===2){
+      var first=practice[0],second=practice[1];
+      var firstTitle=first.querySelector('.box-h'),secondTitle=second.querySelector('.box-h');
+      if(firstTitle&&secondTitle&&firstTitle.textContent.trim()===secondTitle.textContent.trim())secondTitle.remove();
+      while(second.firstChild)first.appendChild(second.firstChild);
+      second.remove();
+    }
+    d={html:combined.innerHTML};
+  }else if(Array.isArray(d.steps)&&d.steps.length)return d.steps;
   var holder=document.createElement('div');holder.innerHTML=d.html||'';
   var slides=[],group=[],words=0;
   function flush(){if(group.length){slides.push(group.map(function(el){return el.outerHTML}).join(''));group=[];words=0}}
@@ -250,14 +264,14 @@ function dayView(n){
       '<article class="content step-body" aria-label="Contenu de l’étape '+(index+1)+'">'+steps[index]+'</article>'+
       '<div class="step-actions">'+(index>0?'<button class="step-secondary" id="prev" type="button">‹ Étape précédente</button>':'')+
       (!atEnd?'<button class="step-primary" id="next" type="button">'+label+' <span aria-hidden="true">›</span></button>':'')+'</div>'+
-      (atEnd?'<div class="step-finish"><p>Vous avez découvert toutes les étapes de cette journée.</p><button class="btn'+(doneNow?' is-done':'')+'" id="fin" type="button" aria-pressed="'+doneNow+'">'+(doneNow?'✓ Journée terminée · Annuler':'✓ Terminer cette journée')+'</button></div>':'')+
+      (atEnd?'<div class="step-finish"><p>Vous avez découvert toutes les étapes de cette journée.</p><button class="btn'+(doneNow?' is-done':'')+'" id="fin" type="button" aria-pressed="'+doneNow+'">'+(doneNow?'✓ Journée terminée · Retour à l’accueil':'✓ Terminer cette journée')+'</button></div>':'')+
       '<nav class="nav day-nav" aria-label="Navigation entre les jours"><a class="'+(p?'':'off')+'" href="#/jour/'+(p?p.n:n)+'">‹ Jour '+(p?p.n:'')+'</a><a class="'+(q?'':'off')+'" href="#/jour/'+(q?q.n:n)+'">Jour '+(q?q.n:'')+' ›</a></nav>';
     document.getElementById('stepper').innerHTML=h;
     attachInlineMedia();
     var prev=document.getElementById('prev'),next=document.getElementById('next'),fin=document.getElementById('fin');
     if(prev)prev.onclick=function(){index--;render();window.scrollTo(0,0)};
     if(next)next.onclick=function(){index++;render();window.scrollTo(0,0)};
-    if(fin)fin.onclick=function(){var j=done.indexOf(n);if(j>-1)done.splice(j,1);else done.push(n);save();render();window.scrollTo(0,0)};
+    if(fin)fin.onclick=function(){if(!isDone(n))done.push(n);save();location.hash='#/';route()};
   }
   render();
 }
